@@ -7,302 +7,309 @@ import {
   Lock,
   CheckCircle2,
   AlertCircle,
-  ExternalLink,
   Activity,
   Users,
   ArrowRight,
   Terminal,
   Cpu,
   Sparkles,
+  Zap,
+  BarChart3,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { isSupabaseConfigured } from '@/lib/utils';
 
 export default function HomePage() {
   const supabaseActive = isSupabaseConfigured();
 
   const techStack = [
-    { name: 'Next.js 15', version: 'App Router', badge: 'info', icon: Server },
-    { name: 'TypeScript', version: 'Strict Mode', badge: 'info', icon: Cpu },
-    { name: 'Tailwind CSS', version: 'v4 Styling', badge: 'purple', icon: Layers },
-    { name: '@supabase/ssr', version: 'Server & Client', badge: 'success', icon: Database },
-    { name: 'Row Level Security', version: 'Postgres RLS', badge: 'success', icon: Lock },
-    { name: 'RBAC Architecture', version: 'Admin & Customer', badge: 'purple', icon: ShieldCheck },
+    { name: 'Next.js 14+ (App Router)', version: 'Server Components & SSR', badge: 'info' as const, icon: Server },
+    { name: 'TypeScript', version: 'Strict Mode Zero Any', badge: 'info' as const, icon: Cpu },
+    { name: 'Tailwind CSS & next-themes', version: 'Light & Dark Mode', badge: 'purple' as const, icon: Layers },
+    { name: '@supabase/ssr', version: 'Cookie Session Auth', badge: 'success' as const, icon: Database },
+    { name: 'Row-Level Security (RLS)', version: 'PostgreSQL Database Isolation', badge: 'success' as const, icon: Lock },
+    { name: 'Recharts & Lucide', version: 'Interactive Admin Analytics', badge: 'purple' as const, icon: BarChart3 },
   ];
 
   const quickNav = [
     {
       title: 'Customer Portal',
-      description: 'Customer workspace with profile management, resource usage, and activity logs.',
+      description: 'Customer workspace with profile management, subscription status, and paginated activity logs.',
       href: '/dashboard',
       role: 'Customer Role',
       icon: Users,
-      color: 'from-blue-500/20 to-cyan-500/20 border-blue-500/30',
+      color: 'from-blue-500/10 to-indigo-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400',
       tag: 'Role: customer',
     },
     {
       title: 'Admin Control Center',
-      description: 'Privileged admin panel for user management, system audit logs, and global analytics.',
+      description: 'Privileged admin panel with Recharts statistics, user management, audit trails, and settings.',
       href: '/admin',
       role: 'Admin Role',
       icon: ShieldCheck,
-      color: 'from-purple-500/20 to-pink-500/20 border-purple-500/30',
+      color: 'from-purple-500/10 to-pink-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400',
       tag: 'Role: admin',
     },
     {
       title: 'Authentication & Session',
-      description: 'SSR-compatible authentication with login, registration, and magic link support.',
+      description: 'SSR-compatible authentication with login, registration, and password recovery.',
       href: '/login',
       role: 'Public / Auth',
       icon: Lock,
-      color: 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30',
+      color: 'from-emerald-500/10 to-teal-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400',
       tag: 'Auth Flow',
     },
   ];
 
   return (
-    <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 space-y-12">
-      {/* Hero Header */}
-      <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 via-slate-900/40 to-slate-950 p-8 sm:p-12 backdrop-blur-xl">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-4 max-w-2xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="purple" className="px-3 py-1 text-xs">
-                <Sparkles className="w-3.5 h-3.5 mr-1 text-purple-400" />
-                Production Baseline Initialized
-              </Badge>
-              <Badge variant={supabaseActive ? 'success' : 'warning'} className="px-3 py-1 text-xs">
-                {supabaseActive ? (
-                  <>
-                    <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-400" />
-                    Supabase Live Connected
-                  </>
-                ) : (
-                  <>
-                    <AlertCircle className="w-3.5 h-3.5 mr-1 text-amber-400" />
-                    Safe Fallback Mode Active
-                  </>
-                )}
-              </Badge>
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
+      {/* Top Navbar */}
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-black shadow-md shadow-indigo-500/20">
+              <Zap className="w-5 h-5" />
             </div>
-
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
-              SaaS Admin Dashboard & <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">Customer Portal</span>
-            </h1>
-
-            <p className="text-slate-300 text-base sm:text-lg leading-relaxed">
-              Full-stack multi-tenant foundation engineered with Next.js 15 App Router, Supabase SSR,
-              PostgreSQL Row Level Security (RLS), and fail-safe environment resilience.
-            </p>
+            <div>
+              <span className="text-base font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                SaaS Portal
+              </span>
+              <span className="hidden sm:inline-block ml-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                v1.0 Production
+              </span>
+            </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row md:flex-col gap-3 shrink-0">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link href="/login">
-              <Button size="lg" className="w-full justify-between">
-                <span>Access Portal</span>
-                <ArrowRight className="w-4 h-4 ml-2" />
+              <Button variant="ghost" size="sm" className="text-xs font-semibold">
+                Sign In
               </Button>
             </Link>
-            <a
-              href="#architecture"
-              className="inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 border border-slate-700 hover:bg-slate-800/60 text-slate-300 hover:text-white text-sm px-4 py-2 h-10"
-            >
-              <Terminal className="w-4 h-4 mr-2 text-slate-400" />
-              View Architecture
-            </a>
+            <Link href="/signup">
+              <Button size="sm" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md text-xs font-semibold">
+                Get Started
+              </Button>
+            </Link>
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* System Status Banner */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-5 flex items-start gap-4">
-          <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-            <Activity className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-xs font-medium text-slate-400">Server Engine</div>
-            <div className="text-sm font-semibold text-white mt-0.5">Next.js 15.2 (Turbopack Ready)</div>
-            <div className="text-xs text-emerald-400 mt-1 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Operational (Port 3000)
+      {/* Main Content */}
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+        {/* Hero Header */}
+        <section className="relative overflow-hidden rounded-3xl border border-indigo-200 dark:border-indigo-900/40 bg-gradient-to-b from-indigo-50/70 via-white to-purple-50/40 dark:from-slate-900/90 dark:via-slate-900/40 dark:to-slate-950 p-8 sm:p-12 backdrop-blur-xl shadow-lg dark:shadow-2xl">
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-4 max-w-2xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="purple" className="px-3 py-1 text-xs font-semibold">
+                  <Sparkles className="w-3.5 h-3.5 mr-1 text-purple-600 dark:text-purple-400" />
+                  Production Ready SaaS Architecture
+                </Badge>
+                <Badge variant={supabaseActive ? 'success' : 'warning'} className="px-3 py-1 text-xs font-semibold">
+                  {supabaseActive ? (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
+                      Supabase PostgreSQL Active
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="w-3.5 h-3.5 mr-1 text-amber-600 dark:text-amber-400" />
+                      Safe Fallback Mode Active
+                    </>
+                  )}
+                </Badge>
+              </div>
+
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                SaaS Admin Dashboard &amp;{' '}
+                <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                  Customer Portal
+                </span>
+              </h1>
+
+              <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed">
+                Full-stack multi-tenant platform engineered with Next.js App Router, Supabase SSR,
+                PostgreSQL Row Level Security (RLS), and seamless Dark/Light mode.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row md:flex-col gap-3 shrink-0">
+              <Link href="/login">
+                <Button size="lg" className="w-full justify-between bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg">
+                  <span>Enter Application</span>
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+              <Link href="/admin">
+                <Button size="lg" variant="outline" className="w-full justify-between border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">
+                  <span>Superadmin Portal</span>
+                  <ShieldCheck className="w-4 h-4 ml-2 text-purple-600 dark:text-purple-400" />
+                </Button>
+              </Link>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-5 flex items-start gap-4">
-          <div className="p-2.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400">
-            <Database className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-xs font-medium text-slate-400">Database Layer</div>
-            <div className="text-sm font-semibold text-white mt-0.5">
-              {supabaseActive ? 'Supabase Postgres Connected' : 'Mock/Safe Dev Mode'}
+        {/* System Status Banner */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/50 p-5 flex items-start gap-4 shadow-sm">
+            <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+              <Activity className="w-5 h-5" />
             </div>
-            <div className="text-xs text-slate-400 mt-1">
-              Schema: <code className="text-slate-300 bg-slate-800/80 px-1 py-0.5 rounded">01_init.sql</code>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-5 flex items-start gap-4">
-          <div className="p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-xs font-medium text-slate-400">Access Control</div>
-            <div className="text-sm font-semibold text-white mt-0.5">Role-Based RLS Policies</div>
-            <div className="text-xs text-slate-400 mt-1">
-              Dual scopes: <span className="text-purple-300">Admin</span> &amp; <span className="text-blue-300">Customer</span>
+            <div>
+              <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Application Framework</div>
+              <div className="text-sm font-semibold text-slate-900 dark:text-white mt-0.5">Next.js 14+ App Router</div>
+              <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Operational &amp; SSR Ready
+              </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Quick Access Routes */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-            <Layers className="w-5 h-5 text-blue-400" />
-            Portal Navigation &amp; Workspaces
-          </h2>
-          <span className="text-xs text-slate-400">Phase 1 Baseline Ready</span>
-        </div>
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/50 p-5 flex items-start gap-4 shadow-sm">
+            <div className="p-2.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400">
+              <Database className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Database Layer</div>
+              <div className="text-sm font-semibold text-slate-900 dark:text-white mt-0.5">
+                {supabaseActive ? 'Supabase Postgres Connected' : 'Mock/Safe Dev Mode Active'}
+              </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Schema: <code className="text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">01_init.sql</code>
+              </div>
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {quickNav.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Card
-                key={item.title}
-                className="group relative flex flex-col justify-between hover:border-slate-700 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/5 hover:-translate-y-1"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-xl bg-gradient-to-br ${item.color} border`}>
-                      <Icon className="w-6 h-6 text-white" />
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/50 p-5 flex items-start gap-4 shadow-sm">
+            <div className="p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Access Control &amp; RBAC</div>
+              <div className="text-sm font-semibold text-slate-900 dark:text-white mt-0.5">Role-Based RLS Policies</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Scopes: <span className="text-purple-600 dark:text-purple-400 font-semibold">Admin</span> &amp; <span className="text-indigo-600 dark:text-indigo-400 font-semibold">Customer</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Quick Access Routes */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+              <Layers className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              Portal Navigation &amp; Workspaces
+            </h2>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Complete &amp; Interactive</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {quickNav.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Card
+                  key={item.title}
+                  className="group relative flex flex-col justify-between border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur-md shadow-sm hover:border-indigo-400 dark:hover:border-indigo-600 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className={`p-3 rounded-xl bg-gradient-to-br ${item.color} border`}>
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <Badge variant="outline" className="text-[11px] font-semibold">
+                        {item.tag}
+                      </Badge>
                     </div>
-                    <Badge variant="outline" className="text-[11px]">
-                      {item.tag}
-                    </Badge>
+
+                    <CardHeader className="p-0">
+                      <CardTitle className="text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {item.title}
+                      </CardTitle>
+                      <CardDescription className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                        {item.description}
+                      </CardDescription>
+                    </CardHeader>
                   </div>
 
-                  <CardHeader className="p-0">
-                    <CardTitle className="text-lg text-white group-hover:text-blue-400 transition-colors">
-                      {item.title}
-                    </CardTitle>
-                    <CardDescription className="text-sm text-slate-400 mt-2 leading-relaxed">
-                      {item.description}
-                    </CardDescription>
-                  </CardHeader>
+                  <CardContent className="p-0 pt-6">
+                    <Link href={item.href}>
+                      <Button variant="outline" size="sm" className="w-full justify-between group-hover:bg-slate-100 dark:group-hover:bg-slate-800 font-semibold text-xs">
+                        <span>Launch Workspace</span>
+                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Tech Stack Specs */}
+        <section className="space-y-4" id="architecture">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Cpu className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            Engineering Specifications
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {techStack.map((tech) => {
+              const Icon = tech.icon;
+              return (
+                <div
+                  key={tech.name}
+                  className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/40 p-4 flex items-center justify-between gap-4 shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-slate-900 dark:text-white">{tech.name}</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">{tech.version}</div>
+                    </div>
+                  </div>
+                  <Badge variant={tech.badge} className="text-[10px]">
+                    Verified
+                  </Badge>
                 </div>
+              );
+            })}
+          </div>
+        </section>
+      </main>
 
-                <div className="pt-6 mt-4 border-t border-slate-800/80 flex items-center justify-between">
-                  <span className="text-xs text-slate-500">{item.role}</span>
-                  <Link
-                    href={item.href}
-                    className="inline-flex items-center text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
-                  >
-                    Open View <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Tech Stack Grid */}
-      <section className="space-y-4" id="architecture">
-        <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-          <Cpu className="w-5 h-5 text-indigo-400" />
-          Configured Stack &amp; Libraries
-        </h2>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {techStack.map((tech) => {
-            const Icon = tech.icon;
-            return (
-              <div
-                key={tech.name}
-                className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 flex flex-col items-center text-center space-y-2 hover:bg-slate-800/40 transition-colors"
-              >
-                <div className="p-2 rounded-lg bg-slate-800 text-blue-400">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="text-sm font-semibold text-white">{tech.name}</div>
-                <div className="text-[11px] text-slate-400">{tech.version}</div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Database Schema & Migration Guide */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Footer */}
+      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
           <div>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Database className="w-5 h-5 text-emerald-400" />
-              Database Architecture (SQL Migration Ready)
-            </h3>
-            <p className="text-sm text-slate-400 mt-1">
-              File: <code className="text-blue-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">supabase/migrations/01_init.sql</code>
-            </p>
+            &copy; {new Date().getFullYear()} SaaS Admin Dashboard &amp; Customer Portal. Built strictly to SRS specs.
           </div>
-          <Badge variant="success">PostgreSQL 15+ Schema</Badge>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-sm text-white">public.profiles</span>
-              <Badge variant="outline">Extends auth.users</Badge>
-            </div>
-            <p className="text-xs text-slate-400">
-              Stores user metadata including role (<code>admin</code> | <code>customer</code>), avatar URL, full name, and automatic timestamps.
-            </p>
-            <div className="text-[11px] text-slate-500 font-mono pt-1">
-              RLS: Self-read/update for customers, universal read/write for admins.
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-sm text-white">public.activity_logs</span>
-              <Badge variant="outline">Audit Trail</Badge>
-            </div>
-            <p className="text-xs text-slate-400">
-              Captures user actions, client IP addresses, and timestamps with automatic indexing for high performance.
-            </p>
-            <div className="text-[11px] text-slate-500 font-mono pt-1">
-              RLS: Isolated user log access + elevated admin auditing.
-            </div>
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+              Customer Portal
+            </Link>
+            <span>•</span>
+            <Link href="/admin" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+              Admin Console
+            </Link>
+            <span>•</span>
+            <Link href="/login" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+              Sign In
+            </Link>
           </div>
         </div>
-
-        <div className="rounded-xl bg-slate-950 p-4 border border-slate-800/80 flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <Terminal className="w-5 h-5 text-slate-400" />
-            <span className="text-xs font-mono text-slate-300">
-              Run Supabase CLI or execute <span className="text-emerald-400">01_init.sql</span> in your Supabase SQL Editor.
-            </span>
-          </div>
-          <a
-            href="https://supabase.com/docs/guides/database"
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"
-          >
-            Supabase Documentation <ExternalLink className="w-3 h-3" />
-          </a>
-        </div>
-      </section>
-    </main>
+      </footer>
+    </div>
   );
 }

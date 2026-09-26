@@ -6,6 +6,12 @@ export const profileUpdateSchema = z.object({
     .min(1, { message: 'Full name is required' })
     .min(2, { message: 'Full name must be at least 2 characters' })
     .max(60, { message: 'Full name cannot exceed 60 characters' }),
+  phone: z
+    .string()
+    .max(25, { message: 'Phone number is too long' })
+    .optional()
+    .or(z.literal('')),
+  timezone: z.string().min(1, { message: 'Timezone is required' }),
   avatarUrl: z
     .string()
     .url({ message: 'Please enter a valid image URL' })

@@ -24,9 +24,9 @@ export const signUpSchema = z
       .string()
       .min(1, { message: 'Email address is required' })
       .email({ message: 'Please enter a valid email address' }),
-    role: z.enum(['customer', 'admin'], {
-      error: 'Please select a valid role',
-    }),
+    phone: z.string().optional().or(z.literal('')),
+    timezone: z.string().optional().or(z.literal('')),
+    role: z.enum(['customer', 'admin']),
     password: z
       .string()
       .min(1, { message: 'Password is required' })

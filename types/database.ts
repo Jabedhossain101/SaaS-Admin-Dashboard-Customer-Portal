@@ -7,6 +7,8 @@ export type Json =
   | Json[];
 
 export type UserRole = 'admin' | 'customer';
+export type UserStatus = 'active' | 'suspended' | 'pending';
+export type UserPlan = 'free' | 'pro' | 'enterprise';
 
 export interface Database {
   public: {
@@ -14,28 +16,37 @@ export interface Database {
       profiles: {
         Row: {
           id: string;
-          email: string;
           full_name: string | null;
-          role: UserRole;
+          phone: string | null;
           avatar_url: string | null;
+          timezone: string;
+          role: UserRole;
+          status: UserStatus;
+          plan: string;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id: string;
-          email: string;
           full_name?: string | null;
-          role?: UserRole;
+          phone?: string | null;
           avatar_url?: string | null;
+          timezone?: string;
+          role?: UserRole;
+          status?: UserStatus;
+          plan?: string;
           created_at?: string;
           updated_at?: string;
         };
         Update: {
           id?: string;
-          email?: string;
           full_name?: string | null;
-          role?: UserRole;
+          phone?: string | null;
           avatar_url?: string | null;
+          timezone?: string;
+          role?: UserRole;
+          status?: UserStatus;
+          plan?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -46,21 +57,24 @@ export interface Database {
           id: string;
           user_id: string | null;
           action: string;
-          ip_address: string | null;
+          description: string | null;
+          metadata: Json | null;
           created_at: string;
         };
         Insert: {
           id?: string;
           user_id?: string | null;
           action: string;
-          ip_address?: string | null;
+          description?: string | null;
+          metadata?: Json | null;
           created_at?: string;
         };
         Update: {
           id?: string;
           user_id?: string | null;
           action?: string;
-          ip_address?: string | null;
+          description?: string | null;
+          metadata?: Json | null;
           created_at?: string;
         };
         Relationships: [
@@ -85,6 +99,7 @@ export interface Database {
     };
     Enums: {
       user_role: UserRole;
+      user_status: UserStatus;
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -93,4 +108,9 @@ export interface Database {
 }
 
 export type Profile = Database['public']['Tables']['profiles']['Row'];
+export type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
+export type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
+
 export type ActivityLog = Database['public']['Tables']['activity_logs']['Row'];
+export type ActivityLogInsert = Database['public']['Tables']['activity_logs']['Insert'];
+export type ActivityLogUpdate = Database['public']['Tables']['activity_logs']['Update'];

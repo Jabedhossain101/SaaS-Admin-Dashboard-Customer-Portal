@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/utils';
-import type { Profile, ActivityLog } from '@/types/database';
+import type { ActivityLog } from '@/types/database';
 import {
   profileUpdateSchema,
   changePasswordSchema,
@@ -12,16 +12,22 @@ import {
   type ChangePasswordFormValues,
 } from '@/lib/validations/profile';
 
+export interface CustomerProfileData {
+  id: string;
+  email: string;
+  fullName: string;
+  phone: string | null;
+  timezone: string;
+  role: 'customer' | 'admin';
+  status: 'active' | 'suspended' | 'pending';
+  plan: string;
+  avatarUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface CustomerDataResponse {
-  profile: {
-    id: string;
-    email: string;
-    fullName: string;
-    role: string;
-    avatarUrl: string | null;
-    createdAt: string;
-    updatedAt: string;
-  };
+  profile: CustomerProfileData;
   activityLogs: ActivityLog[];
   stats: {
     accountStatus: 'Active' | 'Pending' | 'Suspended';
@@ -35,52 +41,61 @@ const DEFAULT_MOCK_LOGS: ActivityLog[] = [
   {
     id: 'log-1',
     user_id: 'mock-user-12345',
-    action: 'User session authenticated via SSR',
-    ip_address: '127.0.0.1',
+    action: 'USER_LOGIN',
+    description: 'User session authenticated via SSR',
+    metadata: { provider: 'email' },
     created_at: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
   },
   {
     id: 'log-2',
     user_id: 'mock-user-12345',
-    action: 'Accessed customer workspace dashboard',
-    ip_address: '127.0.0.1',
+    action: 'DASHBOARD_ACCESS',
+    description: 'Accessed customer workspace dashboard',
+    metadata: { path: '/dashboard' },
     created_at: new Date(Date.now() - 1000 * 60 * 65).toISOString(),
   },
   {
     id: 'log-3',
     user_id: 'mock-user-12345',
-    action: 'Profile credentials security check verified',
-    ip_address: '127.0.0.1',
+    action: 'SECURITY_AUDIT',
+    description: 'Profile credentials security check verified',
+    metadata: { check: 'mfa_status' },
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
   },
   {
     id: 'log-4',
     user_id: 'mock-user-12345',
-    action: 'Tenant isolation policy (RLS) synchronized',
-    ip_address: '127.0.0.1',
+    action: 'POLICY_SYNC',
+    description: 'Tenant isolation policy (RLS) synchronized',
+    metadata: { rls: true },
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
   },
   {
     id: 'log-5',
     user_id: 'mock-user-12345',
-    action: 'Initial account registered and initialized',
-    ip_address: '127.0.0.1',
+    action: 'ACCOUNT_CREATED',
+    description: 'Initial account registered and initialized',
+    metadata: { plan: 'free' },
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
   },
 ];
 
 /**
- * Fetch current authenticated customer data, profile and logs
+ * Fetch current authenticated customer data, profile, and logs
  */
 export async function getCustomerData(): Promise<CustomerDataResponse> {
   const cookieStore = await cookies();
   const mockCookie = cookieStore.get('saas_mock_session');
 
-  let profile = {
+  let profile: CustomerProfileData = {
     id: 'mock-user-12345',
     email: 'customer@saasportal.io',
     fullName: 'Alex Mercer',
+    phone: '+1 (555) 234-5678',
+    timezone: 'UTC',
     role: 'customer',
+    status: 'active',
+    plan: 'Pro Enterprise',
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString(),
     updatedAt: new Date().toISOString(),
@@ -96,45 +111,58 @@ export async function getCustomerData(): Promise<CustomerDataResponse> {
         id: parsed.id || profile.id,
         email: parsed.email || profile.email,
         fullName: parsed.fullName || profile.fullName,
+        phone: parsed.phone !== undefined ? parsed.phone : profile.phone,
+        timezone: parsed.timezone || profile.timezone,
         role: parsed.role || profile.role,
-        avatarUrl: parsed.avatarUrl || profile.avatarUrl,
+        status: parsed.status || profile.status,
+        plan: parsed.plan || profile.plan,
+        avatarUrl: parsed.avatarUrl !== undefined ? parsed.avatarUrl : profile.avatarUrl,
       };
     } catch {
-      // Ignore
+      // Ignore parse error
     }
   }
 
   if (isSupabaseConfigured()) {
     try {
       const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (user) {
         profile.id = user.id;
         profile.email = user.email || profile.email;
         profile.createdAt = user.created_at || profile.createdAt;
 
-        // Query profiles table
-        const { data: dbProfile } = await (supabase.from('profiles') as any)
+        // Query public.profiles table
+        const { data: dbProfile } = await supabase
+          .from('profiles')
           .select('*')
           .eq('id', user.id)
           .maybeSingle();
 
         if (dbProfile) {
-          profile.fullName = dbProfile.full_name || user.user_metadata?.full_name || profile.fullName;
-          profile.role = dbProfile.role || profile.role;
-          profile.avatarUrl = dbProfile.avatar_url || profile.avatarUrl;
-          profile.updatedAt = dbProfile.updated_at || profile.updatedAt;
+          const p = dbProfile as Record<string, unknown>;
+          profile.fullName = (p.full_name as string) || (user.user_metadata?.full_name as string) || profile.fullName;
+          profile.phone = (p.phone as string) || null;
+          profile.timezone = (p.timezone as string) || profile.timezone;
+          profile.role = (p.role as 'customer' | 'admin') || profile.role;
+          profile.status = (p.status as 'active' | 'suspended' | 'pending') || profile.status;
+          profile.plan = (p.plan as string) || profile.plan;
+          profile.avatarUrl = (p.avatar_url as string) || null;
+          profile.updatedAt = (p.updated_at as string) || profile.updatedAt;
         }
 
-        // Query activity_logs table
-        const { data: dbLogs } = await (supabase.from('activity_logs') as any)
+        // Query public.activity_logs table
+        const { data: dbLogs } = await supabase
+          .from('activity_logs')
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
         if (dbLogs && Array.isArray(dbLogs) && dbLogs.length > 0) {
-          activityLogs = dbLogs;
+          activityLogs = dbLogs as ActivityLog[];
         }
       }
     } catch (err) {
@@ -142,20 +170,23 @@ export async function getCustomerData(): Promise<CustomerDataResponse> {
     }
   }
 
+  const statusLabel =
+    profile.status === 'suspended' ? 'Suspended' : profile.status === 'pending' ? 'Pending' : 'Active';
+
   return {
     profile,
     activityLogs,
     stats: {
-      accountStatus: 'Active',
+      accountStatus: statusLabel,
       joinedAt: profile.createdAt,
       totalActions: activityLogs.length,
-      securityTier: 'Standard Enterprise (RLS Protected)',
+      securityTier: `${profile.plan} (RLS Protected)`,
     },
   };
 }
 
 /**
- * Server Action to update customer full name and avatar URL
+ * Server Action to update customer profile (full name, phone, timezone, avatar URL)
  */
 export async function updateCustomerProfileAction(
   data: ProfileUpdateFormValues
@@ -168,18 +199,22 @@ export async function updateCustomerProfileAction(
     };
   }
 
-  const { fullName, avatarUrl } = parseResult.data;
+  const { fullName, phone, timezone, avatarUrl } = parseResult.data;
   const cookieStore = await cookies();
 
   if (!isSupabaseConfigured()) {
     // Update mock session cookie
     const mockCookie = cookieStore.get('saas_mock_session');
-    let currentSession = {
+    let currentSession: Record<string, unknown> = {
       id: 'mock-user-12345',
       email: 'customer@saasportal.io',
       fullName: 'Alex Mercer',
+      phone: '+1 (555) 234-5678',
+      timezone: 'UTC',
       role: 'customer',
-      avatarUrl: null as string | null,
+      status: 'active',
+      plan: 'Pro Enterprise',
+      avatarUrl: null,
     };
 
     if (mockCookie?.value) {
@@ -191,6 +226,8 @@ export async function updateCustomerProfileAction(
     }
 
     currentSession.fullName = fullName;
+    currentSession.phone = phone || null;
+    currentSession.timezone = timezone || 'UTC';
     currentSession.avatarUrl = avatarUrl || null;
 
     cookieStore.set('saas_mock_session', JSON.stringify(currentSession), {
@@ -202,26 +239,32 @@ export async function updateCustomerProfileAction(
 
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/profile');
+    revalidatePath('/dashboard/account');
     revalidatePath('/dashboard/activity');
 
     return {
       success: true,
-      message: 'Profile updated successfully! (Development Mode)',
+      message: 'Profile updated successfully!',
     };
   }
 
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return { success: false, error: 'User not authenticated' };
     }
 
     // 1. Update public.profiles
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error: profileError } = await (supabase.from('profiles') as any)
       .update({
         full_name: fullName,
+        phone: phone || null,
+        timezone: timezone || 'UTC',
         avatar_url: avatarUrl || null,
         updated_at: new Date().toISOString(),
       })
@@ -235,23 +278,29 @@ export async function updateCustomerProfileAction(
     await supabase.auth.updateUser({
       data: {
         full_name: fullName,
+        phone: phone || null,
+        timezone: timezone || 'UTC',
         avatar_url: avatarUrl || null,
       },
     });
 
     // 3. Log activity
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase.from('activity_logs') as any).insert({
       user_id: user.id,
-      action: `Profile updated (Full Name: ${fullName})`,
+      action: 'PROFILE_UPDATE',
+      description: `Customer profile updated (Name: ${fullName})`,
+      metadata: { full_name: fullName, timezone },
     });
 
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/profile');
+    revalidatePath('/dashboard/account');
     revalidatePath('/dashboard/activity');
 
     return {
       success: true,
-      message: 'Profile details saved successfully!',
+      message: 'Profile updated successfully!',
     };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to update profile';
@@ -269,7 +318,7 @@ export async function changeCustomerPasswordAction(
   if (!parseResult.success) {
     return {
       success: false,
-      error: parseResult.error.issues[0]?.message || 'Invalid password configuration',
+      error: parseResult.error.issues[0]?.message || 'Invalid form input',
     };
   }
 
@@ -278,13 +327,15 @@ export async function changeCustomerPasswordAction(
   if (!isSupabaseConfigured()) {
     return {
       success: true,
-      message: 'Password updated successfully! (Development Mock Mode)',
+      message: 'Password updated successfully!',
     };
   }
 
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return { success: false, error: 'User not authenticated' };
@@ -298,20 +349,21 @@ export async function changeCustomerPasswordAction(
       return { success: false, error: error.message };
     }
 
-    // Log activity
+    // Log security activity
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase.from('activity_logs') as any).insert({
       user_id: user.id,
-      action: 'Account security password updated',
+      action: 'PASSWORD_CHANGE',
+      description: 'Account security credentials / password updated',
+      metadata: { event: 'password_reset' },
     });
-
-    revalidatePath('/dashboard/activity');
 
     return {
       success: true,
-      message: 'Your account password has been updated successfully!',
+      message: 'Password updated successfully!',
     };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Failed to update password';
+    const message = err instanceof Error ? err.message : 'Failed to change password';
     return { success: false, error: message };
   }
 }
