@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, UserCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getAdminUserById } from '@/app/actions/admin';
-import { UserEditForm } from './user-edit-form';
+import { UserEditForm } from '@/components/forms/UserEditForm';
 
 export const metadata = {
   title: 'Edit User Profile | Admin Portal',

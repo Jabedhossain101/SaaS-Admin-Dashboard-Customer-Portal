@@ -29,6 +29,7 @@ const ITEMS_PER_PAGE = 8;
 export function UsersTable({ initialUsers }: UsersTableProps) {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [roleFilter, setRoleFilter] = React.useState<string>('all');
+  const [statusFilter, setStatusFilter] = React.useState<string>('all');
   const [currentPage, setCurrentPage] = React.useState(1);
 
   // Debounced/filtered users
@@ -41,15 +42,16 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
         user.id.toLowerCase().includes(searchTerm.toLowerCase().trim());
 
       const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+      const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
 
-      return matchesSearch && matchesRole;
+      return matchesSearch && matchesRole && matchesStatus;
     });
-  }, [initialUsers, searchTerm, roleFilter]);
+  }, [initialUsers, searchTerm, roleFilter, statusFilter]);
 
   // Reset pagination when search or filter changes
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, roleFilter]);
+  }, [searchTerm, roleFilter, statusFilter]);
 
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE) || 1;
   const paginatedUsers = filteredUsers.slice(
@@ -60,7 +62,7 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
   return (
     <div className="space-y-6">
       {/* Search and Filters Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
           <input
@@ -72,7 +74,7 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
           />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-slate-500 dark:text-slate-400" />
             <select
@@ -81,9 +83,23 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
               aria-label="Filter users by role"
               className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm"
             >
-              <option value="all">All Roles ({initialUsers.length})</option>
+              <option value="all">All Roles</option>
               <option value="customer">Customers Only</option>
               <option value="admin">Administrators Only</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              aria-label="Filter users by status"
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm"
+            >
+              <option value="all">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+              <option value="pending">Pending</option>
             </select>
           </div>
 

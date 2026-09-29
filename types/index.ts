@@ -16,6 +16,10 @@ export interface AppUser {
   updatedAt: string;
 }
 
+export type CustomerProfile = AppUser;
+export type AdminUserRow = AppUser;
+
+
 export interface PaginationMeta {
   page: number;
   limit: number;

@@ -7,8 +7,7 @@ export const loginSchema = z.object({
     .email({ message: 'Please enter a valid email address' }),
   password: z
     .string()
-    .min(1, { message: 'Password is required' })
-    .min(6, { message: 'Password must be at least 6 characters' }),
+    .min(1, { message: 'Password is required' }),
 });
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
@@ -30,7 +29,8 @@ export const signUpSchema = z
     password: z
       .string()
       .min(1, { message: 'Password is required' })
-      .min(6, { message: 'Password must be at least 6 characters long' }),
+      .min(8, { message: 'Password must be at least 8 characters long' })
+      .regex(/\d/, { message: 'Password must contain at least one number' }),
     confirmPassword: z
       .string()
       .min(1, { message: 'Please confirm your password' }),
@@ -56,7 +56,8 @@ export const resetPasswordSchema = z
     password: z
       .string()
       .min(1, { message: 'New password is required' })
-      .min(6, { message: 'Password must be at least 6 characters long' }),
+      .min(8, { message: 'Password must be at least 8 characters long' })
+      .regex(/\d/, { message: 'Password must contain at least one number' }),
     confirmPassword: z
       .string()
       .min(1, { message: 'Please confirm your new password' }),
